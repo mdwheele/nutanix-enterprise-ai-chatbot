@@ -18,7 +18,7 @@ function del(id) {
 
     <div>
       <router-link :to="{ path: `/c/${id}`}" v-for="([id, messages]) in Object.entries(chats)" class="group flex justify-between truncate text-left w-full text-white hover:bg-zinc-800 rounded-lg py-2 px-2">
-        <span>{{ messages[1].content }}</span>
+        <span class="truncate w-60">{{ messages[1].content }}</span>
         <button @click.stop.prevent="del(id)">
           <Icon icon="heroicons:trash" class="size-6 group-hover:text-zinc-500 text-transparent" />
         </button>
