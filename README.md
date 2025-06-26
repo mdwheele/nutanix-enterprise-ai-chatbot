@@ -6,6 +6,13 @@
 npm install
 ```
 
+### Update `.env`
+
+```sh
+NAI_HOST=your-nai-instance.example.com
+API_KEY=...
+```
+
 ### Compile and Hot-Reload for Development
 
 ```sh
