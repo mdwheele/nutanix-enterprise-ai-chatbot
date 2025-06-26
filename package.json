@@ -19,7 +19,7 @@
     "@iconify/vue": "^5.0.0",
     "@tailwindcss/typography": "^0.5.16",
     "@vitejs/plugin-vue": "^5.2.1",
-    "@vueuse/core": "^12.4.0",
+    "@vueuse/core": "^12.8.2",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
     "markdown-it": "^14.1.0",

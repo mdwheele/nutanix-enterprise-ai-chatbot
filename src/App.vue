@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted, watchEffect, watch } from 'vue'
+import { ref, nextTick, onMounted, watchEffect, watch, computed } from 'vue'
 import MarkdownIt from 'markdown-it'
 import MarkdownItHighlightjs from 'markdown-it-highlightjs'
 import { Icon } from "@iconify/vue"
@@ -7,6 +7,7 @@ import axios from 'axios'
 import ModelSelect from "./components/ModelSelect.vue"
 import RoleSelect from "./components/RoleSelect.vue"
 import LanguageSelect from "./components/LanguageSelect.vue"
+import { useLocalStorage } from '@vueuse/core'
 
 const markdown = new MarkdownIt()
   .use(MarkdownItHighlightjs)
@@ -16,12 +17,12 @@ function render(string) {
 }
 
 const roles = [
-  { name: 'Person', emoji: '💁', prompt: null },
+  { name: 'Person', emoji: '💁', prompt: 'You are clearly a person' },
   { name: 'Pirate', emoji: '🏴‍☠️', prompt: 'You respond as if you are the worlds best pirate' },
   { name: 'Dog', emoji: '🐶', prompt: 'You respond as if you are a dog' },
   { name: 'Cat', emoji: '🐱', prompt: 'You respond as if you are a cat' }
 ]
-const selectedRole = ref(roles[0])
+const selectedRole = useLocalStorage('nai-chat-role', roles[0])
 
 const translations = [
   { name: 'English', flag: '🇬🇧' },
@@ -31,24 +32,34 @@ const translations = [
   { name: 'Spanish', flag: '🇪🇸' },
   { name: 'Serbian', flag: '🇷🇸' }
 ]
-const selectedTranslation = ref(translations[0])
+const selectedTranslation = useLocalStorage('nai-chat-translation', translations[0])
 
 const message = ref('')
 const messages = ref([{ role: "system", content: "You are a helpful assistant." }])
 
-watch([selectedRole, selectedTranslation], ([role, translation]) => {
-  const systemPrompt = messages.value[0]
-
-  systemPrompt.content = `You are a helpful assistant. ${role.prompt}. Provide translation services on separate lines between English and ${translation.name}.`
+const systemPrompt = computed(() => {
+  return {
+    role: 'system',
+    content: `You are a helpful assistant. Respond only in Markdown format. ${selectedRole.value.prompt}. ${selectedTranslation.value.name !== 'English' ? `Provide translation services on separate lines between English and ${selectedTranslation.value.name}.` : ''}`
+  }
 })
 
+watch (systemPrompt, (message) => {
+  messages.value[0] = systemPrompt.value
+}, { immediate: true })
+
 const models = ref([])
-const selectedModel = ref(null)
+const selectedModel = useLocalStorage('nai-chat-model', null)
 
 onMounted(async () => {
   const response = await axios.get('/models')
   models.value = response.data.data.map(model => model.id)
-  selectedModel.value = models.value[0] || 'mistral7b'
+
+  if (models.value.includes(selectedModel.value)) {
+    selectedModel.value ??= models.value[0]
+  } else {
+    selectedModel.value = models.value[0]
+  }
 })
 
 const loading = ref(false)
@@ -95,7 +106,9 @@ async function send () {
 
     try {
       const event = JSON.parse(value.replace('data: ', ''))
-      messages.value[messages.value.length - 1].content += event.choices[0].delta.content
+      if (event.choices[0].delta.content) {
+        messages.value[messages.value.length - 1].content += event.choices[0].delta.content
+      }
       scrollToBottom()
     } catch (error) {
       //
@@ -134,6 +147,7 @@ async function scrollToBottom() {
     <div class="bg-zinc-800 p-5 pt-4 pb-3 rounded-3xl w-[900px]">
       <div class="flex items-center space-x-6 mb-2">
         <input 
+          tabindex="0"
           class="flex-1 bg-transparent focus:outline-none text-zinc-100 text-lg"
           type="text" 
           placeholder="Ask anything"
