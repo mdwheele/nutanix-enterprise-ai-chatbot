@@ -40,7 +40,12 @@ const messages = ref([{ role: "system", content: "You are a helpful assistant." 
 const systemPrompt = computed(() => {
   return {
     role: 'system',
-    content: `You are a helpful assistant. Respond only in Markdown format. ${selectedRole.value.prompt}. ${selectedTranslation.value.name !== 'English' ? `Provide translation services on separate lines between English and ${selectedTranslation.value.name}.` : ''}`
+    content: `
+      You are a helpful assistant. 
+      Respond only in Markdown format. 
+      ${selectedRole.value.prompt}. 
+      ${selectedTranslation.value.name !== 'English' ? `Provide translation services between English and ${selectedTranslation.value.name}.` : ''}
+    `
   }
 })
 
@@ -140,7 +145,7 @@ async function scrollToBottom() {
         <div v-if="message.role === 'user'" class="rounded-3xl p-4 w-96 bg-zinc-800 justify-self-end text-lg">
           {{ message.content }}
         </div>
-        <div v-else-if="message.role === 'assistant'" class="prose prose-lg prose-zinc prose-invert" v-html="render(message.content)" />
+        <div v-else-if="message.role === 'assistant'" class="prose prose-zinc prose-invert" v-html="render(message.content)" />
       </template>
     </div>
     <h1 v-else class="mb-12 text-3xl text-zinc-100 font-bold">How can Nutanix Enterprise AI help you today?</h1>
