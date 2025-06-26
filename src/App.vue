@@ -1,10 +1,12 @@
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, watchEffect, watch } from 'vue'
 import MarkdownIt from 'markdown-it'
 import MarkdownItHighlightjs from 'markdown-it-highlightjs'
 import { Icon } from "@iconify/vue"
 import axios from 'axios'
 import ModelSelect from "./components/ModelSelect.vue"
+import RoleSelect from "./components/RoleSelect.vue"
+import LanguageSelect from "./components/LanguageSelect.vue"
 
 const markdown = new MarkdownIt()
   .use(MarkdownItHighlightjs)
@@ -13,8 +15,32 @@ function render(string) {
   return markdown.render(string)
 }
 
+const roles = [
+  { name: 'Person', emoji: '💁', prompt: null },
+  { name: 'Pirate', emoji: '🏴‍☠️', prompt: 'You respond as if you are the worlds best pirate' },
+  { name: 'Dog', emoji: '🐶', prompt: 'You respond as if you are a dog' },
+  { name: 'Cat', emoji: '🐱', prompt: 'You respond as if you are a cat' }
+]
+const selectedRole = ref(roles[0])
+
+const translations = [
+  { name: 'English', flag: '🇬🇧' },
+  { name: 'French', flag: '🇫🇷', },
+  { name: 'German', flag: '🇩🇪', },
+  { name: 'Japanese', flag: '🇯🇵' },
+  { name: 'Spanish', flag: '🇪🇸' },
+  { name: 'Serbian', flag: '🇷🇸' }
+]
+const selectedTranslation = ref(translations[0])
+
 const message = ref('')
 const messages = ref([{ role: "system", content: "You are a helpful assistant." }])
+
+watch([selectedRole, selectedTranslation], ([role, translation]) => {
+  const systemPrompt = messages.value[0]
+
+  systemPrompt.content = `You are a helpful assistant. ${role.prompt}. Provide translation services on separate lines between English and ${translation.name}.`
+})
 
 const models = ref([])
 const selectedModel = ref(null)
@@ -119,7 +145,11 @@ async function scrollToBottom() {
           <Icon icon="heroicons:arrow-up" class="size-5" />
         </button>
       </div>
-      <ModelSelect :models="models" v-model="selectedModel" />
+      <div class="flex items-center gap-6">
+        <LanguageSelect :languages="translations" v-model="selectedTranslation" />
+        <RoleSelect :roles="roles" v-model="selectedRole" />
+        <ModelSelect :models="models" v-model="selectedModel" />
+      </div>
     </div>
   </div>
 </template>

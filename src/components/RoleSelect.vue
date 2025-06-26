@@ -3,22 +3,22 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { Icon } from "@iconify/vue"
 
 const props = defineProps({
-  models: Array
+  roles: Array
 })
 
-const modelValue = defineModel()
+const model = defineModel()
 </script>
 
 <template>
-  <div>
+  <div >
     <Menu as="div" class="relative inline-block text-left">
       <div>
         <MenuButton
           v-tippy 
-          content="Model"
+          content="Role"
           class="inline-flex w-full items-center justify-center rounded-md text-sm font-medium text-zinc-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
         >
-          {{ modelValue || 'Model' }}
+          {{ model.emoji }} {{ model.name }}
           <Icon icon="heroicons:chevron-down"
             class="-mr-1 ml-1 size-4 text-zinc-100 hover:text-zinc-100"
             aria-hidden="true"
@@ -38,15 +38,15 @@ const modelValue = defineModel()
           class="absolute left-16 bottom-6 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-zinc-600 shadow-lg ring-1 ring-black/5 focus:outline-none"
         >
           <div class="px-1 py-1">
-            <MenuItem v-for="model in models" :key="model" v-slot="{ active }">
+            <MenuItem v-for="role in roles" :key="role" v-slot="{ active }">
               <button
                 :class="[
                   active ? 'bg-violet-500 text-white' : 'text-zinc-100',
                   'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                 ]"
-                @click="modelValue = model"
+                @click="model = role"
               >
-                {{ model }}
+                {{ role.emoji }} {{ role.name }}
               </button>
             </MenuItem>
           </div>
