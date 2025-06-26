@@ -29,7 +29,7 @@ app.post('/completions', async (req, res, next) => {
     const response = await client.post('/chat/completions', {
       model: req.body.model,
       messages: req.body.messages,
-      max_tokens: 4096,
+      max_tokens: 8192,
       stream: true
     }, {
       responseType: 'stream',
